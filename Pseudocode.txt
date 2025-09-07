@@ -1,0 +1,106 @@
+BEGIN PROGRAM
+
+    FUNCTION generate_question(level):
+        IF level = "easy" THEN
+            num_range ← (1, 10)
+        ELSE IF level = "medium" THEN
+            num_range ← (1, 20)
+        ELSE
+            num_range ← (1, 50)
+
+        num1 ← RANDOM number in num_range
+        num2 ← RANDOM number in num_range
+        operator ← RANDOM choice from ["+", "-", "*"]
+
+        IF operator = "-" AND num2 > num1 THEN
+            SWAP num1, num2   // ensure positive answer
+        END IF
+
+        question ← num1 + operator + num2
+        answer ← EVALUATE(question)
+
+        RETURN question, answer
+    END FUNCTION
+
+
+    FUNCTION ask_question(question, answer):
+        DISPLAY "What is question?"
+        start_time ← CURRENT TIME
+
+        TRY
+            user_answer ← INPUT as INTEGER
+        CATCH error
+            DISPLAY "Invalid input! Marked as incorrect."
+            RETURN 0 points, None, CURRENT TIME - start_time
+
+        end_time ← CURRENT TIME
+        time_taken ← end_time - start_time
+
+        IF user_answer = answer THEN
+            IF time_taken ≤ 5 THEN
+                points ← 2
+            ELSE
+                points ← 1
+            END IF
+            DISPLAY "Correct! +points, time_taken seconds"
+        ELSE
+            points ← 0
+            DISPLAY "Incorrect! The correct answer was answer"
+        END IF
+
+        RETURN points, user_answer, time_taken
+    END FUNCTION
+
+
+    FUNCTION maths_test():
+        DISPLAY "=== Welcome to the Maths Test ==="
+        DISPLAY "Choose difficulty: 1) Easy  2) Medium  3) Hard"
+
+        REPEAT
+            choice ← INPUT
+            IF choice = "1" THEN
+                difficulty ← "easy"
+                total_questions ← 5
+                BREAK
+            ELSE IF choice = "2" THEN
+                difficulty ← "medium"
+                total_questions ← 10
+                BREAK
+            ELSE IF choice = "3" THEN
+                difficulty ← "hard"
+                total_questions ← 15
+                BREAK
+            ELSE
+                DISPLAY "Invalid input, enter 1, 2 or 3"
+        UNTIL valid choice chosen
+
+        DISPLAY "You selected difficulty mode! Let's begin..."
+
+        total_score ← 0
+        results ← EMPTY LIST
+
+        FOR q FROM 1 TO total_questions DO
+            question, answer ← generate_question(difficulty)
+            DISPLAY "Question q of total_questions"
+            points, user_answer, time_taken ← ask_question(question, answer)
+            total_score ← total_score + points
+            APPEND (question, answer, user_answer, points, time_taken) TO results
+        END FOR
+
+        // --- Summary ---
+        DISPLAY "=== Test Completed ==="
+        DISPLAY "Final Score: total_score / (total_questions * 2)"
+        percentage ← ROUND((total_score / (total_questions * 2)) * 100, 2)
+        DISPLAY "Percentage: percentage %"
+
+        DISPLAY "Question Breakdown"
+        DISPLAY "Q#   Question   Your Ans   Correct Ans   Points   Time(s)"
+        FOR EACH record IN results DO
+            DISPLAY record
+        END FOR
+    END FUNCTION
+
+
+    CALL maths_test()
+
+END PROGRAM
